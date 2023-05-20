@@ -56,6 +56,37 @@ func TestFindStartAndEndOfPath(t *testing.T) {
 				},
 			}, want: models.Flight{Source: "SFO", Destination: "EWR"},
 		},
+		{
+			input: [][]string{}, want: models.Flight{Source: "", Destination: ""},
+		},
+		{
+			input: [][]string{
+				{
+					"EWR",
+					"IND",
+				},
+				{
+					"IND",
+					"EWR",
+				},
+				{
+					"SFO",
+					"ATL",
+				},
+				{
+					"GSO",
+					"IND",
+				},
+				{
+					"ATL",
+					"GSO",
+				},
+				{
+					"IND",
+					"EWR",
+				},
+			}, want: models.Flight{Source: "IND", Destination: "EWR"},
+		},
 	}
 
 	for _, tc := range tests {

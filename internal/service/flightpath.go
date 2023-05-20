@@ -11,12 +11,12 @@ func NewFlightPath() *FlightPath {
 }
 
 func (f *FlightPath) FindStartAndEndOfPath(flights [][]string) models.Flight {
-	destinations := make(map[string]struct{})
 	sources := make(map[string]struct{})
+	destinations := make(map[string]struct{})
 
 	for _, flight := range flights {
-		destinations[flight[1]] = struct{}{}
 		sources[flight[0]] = struct{}{}
+		destinations[flight[1]] = struct{}{}
 	}
 
 	var startEndFlight models.Flight
@@ -24,10 +24,14 @@ func (f *FlightPath) FindStartAndEndOfPath(flights [][]string) models.Flight {
 	for _, flight := range flights {
 		if _, found := destinations[flight[0]]; !found {
 			startEndFlight.Source = flight[0]
+		} else {
+			delete(destinations, flight[0])
 		}
 
 		if _, found := sources[flight[1]]; !found {
 			startEndFlight.Destination = flight[1]
+		} else {
+			delete(sources, flight[1])
 		}
 	}
 
