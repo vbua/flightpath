@@ -1,0 +1,9 @@
+{
+  "server_opts": {
+    "read_timeout": 60,
+    "write_timeout": 60,
+    "idle_timeout": 60,
+    "max_request_body_size_mb": 100
+  },
+  "main_port": ":8080"
+}

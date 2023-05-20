@@ -1,0 +1,24 @@
+run:
+  timeout: 5m
+  skip-files:
+    - '.*_test.go'
+    - '.*_mock.go'
+    - "vendor/*"
+
+linters:
+  enable-all: true
+  disable:
+    - exhaustivestruct
+    - exhaustruct
+    - gci
+    - gomnd
+    - musttag
+
+linters-settings:
+  varnamelen:
+    ignore-names:
+      - id
+  tagliatelle:
+    case:
+      rules:
+        json: snake
