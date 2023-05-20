@@ -17,3 +17,25 @@
 - Define and document the format of the API endpoint in the README.
 - Use Golang and/or any tools that you think will help you best accomplish the task at hand.
 - When you are done with the assignment, follow up and reply-all to the email that directed you to this document. Include your private github link and an estimate of how long you spent on the task and any interesting ideas you wish to share.
+
+## HOW TO USE
+- to run locally `make run`
+- to test `make test`
+
+## Calculate endpoint
+
+```
+curl --location --request POST 'http://localhost:8080/calculate' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "flights": [["IND", "EWR"], ["SFO", "ATL"], ["GSO", "IND"], ["ATL", "GSO"]]
+}'
+```
+
+Response:
+```
+{
+    "source": "SFO",
+    "destination": "EWR"
+}
+```
