@@ -1,13 +1,15 @@
 UNIT_COVERAGE_MIN = 80
 REPO_NAME = flightpath
 
+include .env
+export
+
+run:
+	go run -race cmd/flightpath/main.go
+
 fmt:
 	$(info run go fmt)
 	@go fmt ./...
-
-gofumpt:
-	$(info run gofumpt)
-	@gofumpt -w .
 
 vet:
 	$(info run go vet)
@@ -48,4 +50,4 @@ unit:
 		echo "coverage is enough $$CUR_COVERAGE >= $(UNIT_COVERAGE_MIN)"; \
 	fi
 
-test: gofumpt fmt vet unit deps_check lint security_scan
+test: fmt vet unit deps_check lint security_scan

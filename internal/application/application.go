@@ -3,13 +3,19 @@ package application
 import (
 	"context"
 	"fmt"
+	"net"
 	"sync"
 
+	"github.com/vbua/flightpath/internal/api"
+	"github.com/vbua/flightpath/internal/config"
+	"github.com/vbua/flightpath/internal/service"
 	"go.uber.org/zap"
 )
 
 type Application struct {
-	logger *zap.SugaredLogger
+	cfg     *config.Config
+	service *service.FlightPath
+	logger  *zap.SugaredLogger
 
 	errChan chan error
 
@@ -22,10 +28,69 @@ func New() *Application {
 	}
 }
 
-func (a *Application) Start(_ context.Context) error {
+func (a *Application) Start(ctx context.Context) error {
 	if err := a.initLogger(); err != nil {
 		return fmt.Errorf("can't init logger: %w", err)
 	}
+
+	if err := a.initConfig(); err != nil {
+		return fmt.Errorf("can't init config: %w", err)
+	}
+
+	a.service = service.NewFlightPath()
+
+	if err := a.initAPIServer(ctx); err != nil {
+		return fmt.Errorf("can't init api server: %w", err)
+	}
+
+	return nil
+}
+
+func (a *Application) initConfig() error {
+	var err error
+
+	a.cfg, err = config.ParseConfig()
+	if err != nil {
+		return fmt.Errorf("can't parse config: %w", err)
+	}
+
+	return nil
+}
+
+func (a *Application) initAPIServer(ctx context.Context) error {
+	apiServer := api.NewRouter(
+		a.service,
+		a.cfg.ServerOpts,
+		a.logger,
+	)
+
+	listener, err := net.Listen("tcp4", a.cfg.MainPort)
+	if err != nil {
+		return fmt.Errorf("can't listen tcp port %s: %w", a.cfg.MainPort, err)
+	}
+
+	a.wg.Add(1)
+
+	go func() {
+		defer a.wg.Done()
+
+		err := apiServer.Start(listener)
+		if err != nil {
+			a.errChan <- fmt.Errorf("can't start http server: %w", err)
+		}
+	}()
+
+	a.wg.Add(1)
+
+	go func() {
+		defer a.wg.Done()
+
+		<-ctx.Done()
+
+		if err := apiServer.Shutdown(); err != nil {
+			a.errChan <- fmt.Errorf("can't shutdown http server: %w", err)
+		}
+	}()
 
 	return nil
 }
